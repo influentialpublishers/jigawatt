@@ -22,5 +22,15 @@
   "bugs": {
     "url": "https://github.com/influentialpublishers/ifpem/issues"
   },
-  "homepage": "https://github.com/influentialpublishers/ifpem#readme"
+  "homepage": "https://github.com/influentialpublishers/ifpem#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "ramda": "^0.21.0"
+  }
 }
