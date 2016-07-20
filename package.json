@@ -23,6 +23,25 @@
     "url": "https://github.com/influentialpublishers/ifpem/issues"
   },
   "homepage": "https://github.com/influentialpublishers/ifpem#readme",
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module",
+      "ecmaFeatures": {}
+    },
+    "env": {
+      "node": true
+    },
+    "ecmaFeatures": {
+      "arrowFunctions": true,
+      "blockBindings": true,
+      "defaultParams": true,
+      "destructuring": true,
+      "spread": true,
+      "templateStrings": true
+    }
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "istanbul": "^0.4.4",
