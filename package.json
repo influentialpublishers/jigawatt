@@ -1,5 +1,5 @@
 {
-  "name": "ifpem",
+  "name": "jigawatt",
   "version": "0.1.1",
   "description": "Influential's Functional, Promise-based Express Middleware",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/influentialpublishers/ifpem.git"
+    "url": "git+https://github.com/influentialpublishers/jigawatt.git"
   },
   "keywords": [
     "middleware",
@@ -20,9 +20,9 @@
   "author": "Nathan A Sculli <nsculli@influential.co>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/influentialpublishers/ifpem/issues"
+    "url": "https://github.com/influentialpublishers/jigawatt/issues"
   },
-  "homepage": "https://github.com/influentialpublishers/ifpem#readme",
+  "homepage": "https://github.com/influentialpublishers/jigawatt#readme",
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
