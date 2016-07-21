@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 
 const MW     = require('../index.js');
 
-describe('ifpem/index.js', () => {
+describe('jigawatt/index.js', () => {
 
   it('should be a function', () => expect(MW).to.be.a('function'));
 
@@ -13,6 +13,35 @@ describe('ifpem/index.js', () => {
     const test = () => MW();
 
     expect(test).to.throw(TypeError, /You must provide at least one function/);
+
+  });
+
+
+  it('should call the validation function of the given middleware using ' +
+  'the awesomize module', () => {
+
+    const test_middleware = {
+      awesomize: (v) => ({
+        foo: {
+          validate: [ v.required ]
+        }
+      })
+    };
+
+    const req = {};
+
+    const res = {
+      json: (x) => { throw Error("Unexpected: " + x); }
+    };
+
+    const test = MW(test_middleware);
+
+    test(req, res, (err) => {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.eql('ValidationError');
+      expect(err.validation.foo).to.eql('required');
+
+    });
 
   });
 

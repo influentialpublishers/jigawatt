@@ -1,5 +1,6 @@
 
-const _ = require('ramda');
+const _         = require('ramda');
+const awesomize = require('./lib/awesomize');
 
 const throwMiddlewareNotFunction = (index) => {
   throw TypeError(`All middleware given must be functions - index: ${index}`);
@@ -27,6 +28,14 @@ const testMiddlewareArray = _.curry((index, mw) => {
 });
 
 
+const run = _.curry((req, middleware) => {
+  const current = _.head(middleware);
+  const spec    = awesomize(req, current.awesomize);
+
+  return spec(req)
+});
+
+
 const testMiddleware = (middleware) => middleware.forEach((mw, index) => {
   return _.cond([
     [ _.is(Function),   _.always(null) ]
@@ -38,10 +47,16 @@ const testMiddleware = (middleware) => middleware.forEach((mw, index) => {
 const Middleware = (...middleware) => {
   if(middleware.length < 1) throwMiddlewareEmpty();
 
-  testMiddleware(middleware);
 
+  return (req, res, next) => {
 
-  return (req, res, next) => next();
+    run(req, middleware)
+
+    .then(res.json.bind(res))
+
+    .catch(next);
+
+  };
 
 };
 
