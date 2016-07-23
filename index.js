@@ -8,16 +8,16 @@ const throwMiddlewareEmpty = () => {
   throw TypeError('You must provide at least one middleware');
 };
 
-const defaultSpec = _.always(_.compose(
-  Bluebird.resolve
-, _.prop('data')
-))
+const defaultSpec = _.always(_.compose(Bluebird.resolve, _.prop('data')))
 
 
-const getSpec = (req) => _.compose(
-  _.ifElse(_.is(Function), awesomize(req), defaultSpec)
+const awesomizeSpec = _.curry((req, spec) => awesomize(req, spec))
+
+
+const getSpec = _.curry((current, req) => _.compose(
+  _.ifElse(_.is(Function), awesomizeSpec(req), defaultSpec)
 , _.prop('awesomize')
-);
+)(current));
 
 const getIO = _.propOr((req, data) => data, 'io');
 
@@ -25,30 +25,23 @@ const getIO = _.propOr((req, data) => data, 'io');
 const getTransform = _.propOr((req, data) => data, 'transform');
 
 
-const run = _.curry((req, middleware) => {
-  const current   = _.head(middleware);
-  const spec      = getSpec(req)(current);
-  const io        = getIO(current);
-  const transform = getTransform(current);
-  const cur_data  = _.propOr({}, 'data', req);
+const mergeDataIntoReq = (req) => _.compose(_.merge(req), _.objOf('data'));
 
-  return spec(req)
 
-  .then((data) => Bluebird.props(_.merge(cur_data, io(req, data) ))) 
+const mergeIOData = (middleware, req) => _.compose(
+  Bluebird.props
+, _.merge(_.propOr({}, 'data', req))
+, getIO(middleware).bind(middleware, req)
+);
 
-  .then(transform.bind(current, req))
 
-  .then(_.compose(_.merge(req), _.objOf('data')))
-
-  .then((new_req) => {
-    if (_.length(middleware) > 1) {
-      return run(new_req, _.tail(middleware));
-    }
-
-    return new_req.data;
-  })
-
-});
+const run = _.curry(([current, ...rest], req) => _.composeP(
+  (next) => _.length(rest) ? run(rest, next) : next.data
+, mergeDataIntoReq(req)
+, getTransform(current).bind(current, req)
+, mergeIOData(current, req)
+, getSpec(current, req)
+)(req));
 
 
 const Middleware = (...middleware) => {
@@ -57,9 +50,8 @@ const Middleware = (...middleware) => {
   //@TODO validate all the middlewar objects.
   //look in lib/validate.js for inspiration.
 
-  return (req, res, next) => {
-
-    run(req, middleware)
+  return (req, res, next) => { 
+    run(middleware, req)
 
     .then(res.json.bind(res))
 
