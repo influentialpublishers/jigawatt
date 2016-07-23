@@ -19,6 +19,7 @@ const getSpec = _.curry((current, req) => _.compose(
 , _.prop('awesomize')
 )(current));
 
+
 const getIO = _.propOr((req, data) => data, 'io');
 
 
@@ -35,13 +36,33 @@ const mergeIOData = (middleware, req) => _.compose(
 );
 
 
-const run = _.curry(([current, ...rest], req) => _.composeP(
-  (next) => _.length(rest) ? run(rest, next) : next.data
-, mergeDataIntoReq(req)
+const mergeReqArray = (initial_req) => _.reduce((acc, x) => {
+  acc.data = _.merge(acc.data, x.data)
+  return acc;
+}, initial_req);
+
+
+const runSingle = _.curry((current, req) => _.composeP(
+  mergeDataIntoReq(req)
 , getTransform(current).bind(current, req)
 , mergeIOData(current, req)
 , getSpec(current, req)
 )(req));
+
+
+const runParallel = _.curry((current, req) => _.composeP(
+  mergeReqArray(req)
+, _.compose(Bluebird.all, _.map((x) => runSingle(x, req)))
+)(current));
+
+
+const run = _.curry(([current, ...rest], req) => _.composeP(
+  (next) => _.length(rest) ? run(rest, next) : next.data
+, _.ifElse(
+    _.always(Array.isArray(current))
+  , runParallel(current)
+  , runSingle(current)
+))(req));
 
 
 const Middleware = (...middleware) => {

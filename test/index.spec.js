@@ -120,6 +120,38 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  it('should run arrays of middleware in parallel', (done) => {
+
+    const req = { foo: 'bar' };
+    const mw1 = _.merge(basic_middleware, {
+      io: () => ({ bar: 'Chic-fil-a' })
+    });
+    const mw2 = _.merge(basic_middleware, {
+      io: () => ({ boo: 'Wendy\'s' })
+    });
+    const mw3 = _.merge(basic_middleware, {
+      io: () => ({ buzz: 'Chipotle' })
+    });
+    const mw4 = _.merge(basic_middleware, {
+      io: () => ({ fuzz: 'In-n-Out' })
+    });
+
+    const test = JW(mw1, [mw2, mw3], mw4);
+
+    const res = {
+      json: (data) => {
+        expect(data.bar).to.eql('Chic-fil-a');
+        expect(data.boo).to.eql('Wendy\'s');
+        expect(data.buzz).to.eql('Chipotle');
+        expect(data.fuzz).to.eql('In-n-Out');
+        done()
+      }
+    };
+
+    test(req, res, done);
+  });
+
+
   it('should pass in the req.data object if no awesomize function is ' +
   'provided', (done) => {
     const req = { foo: 'bar', data: { bar: 'blah' }};
