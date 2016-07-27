@@ -47,6 +47,7 @@
     "coveralls": "^2.11.11",
     "istanbul": "^0.4.4",
     "mocha": "^2.5.3",
+    "props-check": "^0.2.1",
     "sinon": "^1.17.4"
   },
   "dependencies": {
