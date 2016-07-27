@@ -176,6 +176,24 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  it('should pass the data to transform if no io function is provided',
+  (done) => {
+    const req = { foo: 'bar' };
+    const mw = _.omit(['io'], basic_middleware);
+
+    const test = JW(mw);
+
+    const res = {
+      json: (data) => {
+        expect(data).to.deep.eql(req);
+        done();
+      }
+    }
+
+    test(req, res, done);
+  });
+
+
   it.skip('should throw a TypeError if one of the items is not a function',
   () => {
 
