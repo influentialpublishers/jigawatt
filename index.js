@@ -2,6 +2,7 @@
 const _         = require('ramda');
 const Bluebird  = require('bluebird');
 const awesomize = require('./lib/awesomize');
+const Validate  = require('./lib/validate');
 
 
 const throwMiddlewareEmpty = () => {
@@ -67,6 +68,7 @@ const run = _.curry(([current, ...rest], req) => _.composeP(
 
 const Middleware = (...middleware) => {
   if(middleware.length < 1) throwMiddlewareEmpty();
+  Validate.propsCheck(_.unnest(middleware));
 
   //@TODO validate all the middlewar objects.
   //look in lib/validate.js for inspiration.

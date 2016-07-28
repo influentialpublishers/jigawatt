@@ -241,4 +241,32 @@ describe('jigawatt/index.js', () => {
 
   });
 
+
+  it('should return a PropsCheckError when a middleware has invalid keys'
+    , () => {
+
+      const m1 = {
+        awesomize: (v) => ({ foo: { validate: [ v.required ] } })
+      , io: (req, data) => ({ bar: data.foo })
+      , transform: (req, data) => data
+      };
+
+      const m2 = {
+        awesomize: (v) => ({ foo: { validate: [ v.required ] } })
+      , io: (req, data) => ({ bar: data.foo })
+      };
+
+      const m3 = {
+        awesomizer: (v) => ({ foo: { validate: [ v.required ] } })
+      , io: (req, data) => ({ bar: data.foo })
+      };
+
+      const test1 = () => JW(m3);
+      expect(test1).to.throw(Error);
+
+      const test2 = () => JW(m1, [m2, m3]);
+      expect(test2).to.throw(Error);
+
+  });
+
 });
