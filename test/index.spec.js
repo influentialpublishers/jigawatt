@@ -244,10 +244,10 @@ describe('jigawatt/index.js', () => {
       };
 
       const test1 = () => JW(m3);
-      expect(test1).to.throw(/You gave me this/);
+      expect(test1).to.throw(Error);
 
       const test2 = () => JW(m1, [m2, m3]);
-      expect(test2).to.throw(/You gave me this/);
+      expect(test2).to.throw(Error);
 
   });
 
