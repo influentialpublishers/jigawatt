@@ -4,11 +4,6 @@ const Bluebird  = require('bluebird');
 const awesomize = require('./lib/awesomize');
 const Validate  = require('./lib/validate');
 
-
-const throwMiddlewareEmpty = () => {
-  throw TypeError('You must provide at least one middleware');
-};
-
 const defaultSpec = _.always(_.compose(Bluebird.resolve, _.prop('data')))
 
 
@@ -67,11 +62,7 @@ const run = _.curry(([current, ...rest], req) => _.composeP(
 
 
 const Middleware = (...middleware) => {
-  if(middleware.length < 1) throwMiddlewareEmpty();
-  Validate.propsCheck(_.unnest(middleware));
-
-  //@TODO validate all the middlewar objects.
-  //look in lib/validate.js for inspiration.
+  Validate.testMiddleware(middleware)
 
   return (req, res, next) => { 
     run(middleware, req)
