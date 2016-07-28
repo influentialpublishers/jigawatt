@@ -248,7 +248,6 @@ describe('jigawatt/index.js', () => {
     expect(test).to.throw(TypeError, message);
   });
 
-
   it('should return a function with an arity of 3 when given one argument ' +
   'that is a function', () => {
 
@@ -257,7 +256,6 @@ describe('jigawatt/index.js', () => {
     expect(actual.length).to.eql(3);
 
   });
-
 
   it('should return a PropsCheckError when a middleware has invalid keys'
     , () => {
@@ -283,6 +281,9 @@ describe('jigawatt/index.js', () => {
 
       const test2 = () => JW(m1, [m2, m3]);
       expect(test2).to.throw(Error);
+
+      const test3 = () => JW({}, [m2, [m1, m3]]);
+      expect(test3).to.throw(Error);
 
   });
 
