@@ -277,13 +277,13 @@ describe('jigawatt/index.js', () => {
       };
 
       const test1 = () => JW(m3);
-      expect(test1).to.throw(Error);
+      expect(test1).to.throw(/awesomizer <-> awesomize/);
 
       const test2 = () => JW(m1, [m2, m3]);
-      expect(test2).to.throw(Error);
+      expect(test2).to.throw(/awesomizer <-> awesomize/);
 
       const test3 = () => JW({}, [m2, [m1, m3]]);
-      expect(test3).to.throw(Error);
+      expect(test3).to.throw(/awesomizer <-> awesomize/);
 
   });
 
