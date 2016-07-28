@@ -223,27 +223,27 @@ describe('jigawatt/index.js', () => {
 
   });
 
-  it.skip('should throw an exception if a sub-item is not a function',
+  it('should throw an exception if a sub-item is not a object',
   () => {
-    const f1 = () => null;
-    const f2 = () => null;
-    const f3 = () => null;
-    const test = () => JW(f1, [f2, 'foo'], f3);
-    const message = 'All middleware given must be functions - index: 1:1'
+    const o1 = {};
+    const o2 = {};
+    const o3 = {};
+    const test = () => JW(o1, [o2, 'foo'], o3);
+    const message = 'All middleware given must be objects - index: 1:1'
 
     expect(test).to.throw(TypeError, message);
 
   });
 
-  it.skip('should throw an exception if a sub-sub-item is not a function',
+  it('should throw an exception if a sub-sub-item is not a function',
   () => {
-    const f1 = () => null;
-    const f2 = () => null;
-    const f3 = () => null;
-    const f4 = () => null;
-    const f5 = () => null;
-    const test = () => JW([f2, [f4, f5, 'foo']], f1, f3);
-    const message = 'All middleware given must be functions - index: 0:1:2'
+    const o1 = {};
+    const o2 = {};
+    const o3 = {};
+    const o4 = {};
+    const o5 = {};
+    const test = () => JW([o2, [o4, o5, 'foo']], o1, o3);
+    const message = 'All middleware given must be objects - index: 0:1:2'
 
     expect(test).to.throw(TypeError, message);
   });
