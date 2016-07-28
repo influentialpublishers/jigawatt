@@ -68,10 +68,8 @@ const run = _.curry(([current, ...rest], req) => _.composeP(
 
 const Middleware = (...middleware) => {
   if(middleware.length < 1) throwMiddlewareEmpty();
+  Validate.testMiddleware(middleware);
   Validate.propsCheck(_.unnest(middleware));
-
-  //@TODO validate all the middlewar objects.
-  //look in lib/validate.js for inspiration.
 
   return (req, res, next) => { 
     run(middleware, req)
