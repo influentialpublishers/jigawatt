@@ -51,7 +51,7 @@
     "sinon": "^1.17.4"
   },
   "dependencies": {
-    "awesomize": "^0.1.10",
+    "awesomize": "^0.1.11",
     "bluebird": "^3.4.1",
     "ramda": "^0.21.0"
   }
