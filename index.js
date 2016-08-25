@@ -52,13 +52,16 @@ const runParallel = _.curry((current, req) => _.composeP(
 )(current));
 
 
+const rethrowError = (e) => { throw e; };
+
+
 const run = _.curry(([current, ...rest], req) => _.composeP(
-  (next) => _.length(rest) ? run(rest, next) : next.data
+  (res) => _.length(rest) ? run(rest, res) : res.data
 , _.ifElse(
     _.always(Array.isArray(current))
   , runParallel(current)
   , runSingle(current)
-))(req));
+))(req).catch(rethrowError));
 
 
 const Middleware = (...middleware) => {

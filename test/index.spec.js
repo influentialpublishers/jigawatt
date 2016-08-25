@@ -1,6 +1,7 @@
 /*eslint-env node, mocha */
-const _ = require('ramda');
-const expect = require('chai').expect;
+const _           = require('ramda');
+const expect      = require('chai').expect;
+const { inspect } = require('util');
 
 const JW     = require('../index.js');
 
@@ -286,5 +287,31 @@ describe('jigawatt/index.js', () => {
       expect(test3).to.throw(/awesomizer <-> awesomize/);
 
   });
+
+
+  it('should pass any execption thrown from the `io` function to the ' +
+  '`next` route function', (done) => {
+
+    const fn = () => { throw new Error('foo'); };
+
+    const m1 = {
+      io: (req, data) => ({ foo: fn(data) })
+    }
+
+    const res = {
+      json: (x) => done( new Error('Should not get here: ' + inspect(x)) )
+    };
+
+    const test = JW(m1);
+
+    test({}, res, (err) => {
+
+      expect(err.message).to.eql('foo');
+      done();
+
+    });
+
+  });
+
 
 });
