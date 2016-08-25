@@ -1,6 +1,6 @@
 {
   "name": "jigawatt",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Influential's Functional, Promise-based Express Middleware",
   "main": "index.js",
   "scripts": {
