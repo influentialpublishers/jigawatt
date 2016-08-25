@@ -64,14 +64,12 @@ const run = _.curry(([current, ...rest], req) => _.composeP(
 const Middleware = (...middleware) => {
   Validate.testMiddleware(middleware)
 
-  return (req, res, next) => { 
+  return (req, res, next) =>
     run(middleware, req)
 
-    .then(res.json.bind(res))
-
+    .then( res.json.bind(res) )
+    
     .catch(next);
-
-  };
 
 };
 
