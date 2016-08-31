@@ -368,4 +368,101 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  describe('JW::branch', function() {
+
+    it('should call the first middleware if the predicate function returns ' +
+    ' a truthy value', function(done) {
+
+      const predicate = _.T
+
+      const whenTrue  = {
+        transform: (req, data) => {
+          expect(data.foo).to.eql('bar');
+          return data;
+        }
+      };
+
+      const whenFalse = {
+        transform: () => { throw new Error("Wait...what? How?") }
+      };
+
+
+      const test = JW(JW.branch(predicate, whenTrue, whenFalse));
+
+      const req  = { data: { foo: 'bar' } };
+      const res  = { json: (x) => {
+        expect(x).to.eql(req.data);
+        done();
+      }};
+
+      test(req, res, done);
+
+    });
+
+
+    it('should call the second middleware if the predicate function returns ' +
+    ' a falsy value', function(done) {
+
+      const predicate = _.F
+
+      const whenTrue  = {
+        transform: () => { throw new Error('The result is a lie!') }
+      };
+
+      const whenFalse = {
+        transform: (req, data) => {
+          expect(data.foo).to.eql('baz');
+          return data;
+        }
+      };
+
+
+      const test = JW(JW.branch(predicate, whenTrue, whenFalse));
+
+      const req  = { data: { foo: 'baz' } };
+      const res  = { json: (x) => {
+        expect(x).to.eql(req.data);
+        done();
+      }};
+
+      test(req, res, done);
+
+    });
+
+
+    it('should call the predicate with the req and data objects',
+    function(done) {
+
+
+      const req  = { data: { foo: 'baz' } };
+      const res  = { json: (x) => {
+        expect(x).to.eql(req.data);
+        done();
+      }};
+
+
+      const predicate = (req, data) => {
+        expect(req).to.eql(req);
+        expect(data).to.eql(data);
+        return true;
+      };
+
+
+      const whenTrue = {
+        transform: (req, data) => data
+      };
+
+      const whenFalse = {
+        transform: () => { throw new Error('I call shenanigans!') }
+      };
+
+      const test = JW(JW.branch(predicate, whenTrue, whenFalse));
+
+      test(req, res, done);
+
+    });
+
+  });
+
+
 });
