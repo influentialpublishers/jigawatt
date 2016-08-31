@@ -1,4 +1,7 @@
 
+const debug       = require('debug')('jigawatt');
+const { inspect } = require('util');
+
 const _         = require('ramda');
 const Bluebird  = require('bluebird');
 const awesomize = require('./lib/awesomize');
@@ -75,6 +78,21 @@ const Middleware = (...middleware) => {
     .catch(next);
 
 };
+
+
+Middleware.debug = (label) => ({
+  transform: (req, data) => {
+    const data_as_string = inspect(data);
+    debug(`${label}: ${data_as_string}`);
+
+    return data;
+  }
+});
+
+
+Middleware.tap = (fn) => ({
+  transform: (req, data) => Bluebird.resolve(fn(req, data)).return(data)
+});
 
 
 module.exports = Middleware;

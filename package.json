@@ -53,6 +53,7 @@
   "dependencies": {
     "awesomize": "^0.1.12",
     "bluebird": "^3.4.1",
+    "debug": "^2.2.0",
     "ramda": "^0.21.0"
   }
 }

@@ -314,4 +314,58 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  describe('JW::debug', function() {
+
+    it('should not affect the data object', function(done) {
+
+      const test = JW(JW.debug('foo'));
+
+      const req = {
+        data: { foo: 'bar' }
+      };
+
+      const res = {
+        json: (x) => {
+          expect(req.data).to.eql(x);
+          done();
+        }
+      };
+
+      test(req, res, done);
+
+    });
+
+  });
+
+
+  describe('JW::tap', function() {
+
+    it('should not affect the data object', function(done) {
+
+      const foo = (req, data) => {
+        expect(data.foo).to.eql('bar');
+        return 'blah';
+      };
+      const test = JW(JW.tap(foo));
+
+
+      const req = {
+        data: { foo: 'bar' }
+      };
+
+
+      const res = {
+        json: (x) => {
+          expect(req.data).to.eql(x);
+          done();
+        }
+      };
+
+      test(req, res, done);
+
+    });
+
+  });
+
+
 });
