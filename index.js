@@ -95,4 +95,13 @@ Middleware.tap = (fn) => ({
 });
 
 
+Middleware.branch = (predicate, ifTrue, otherwise) => ({
+  transform: (req, data) =>
+    Bluebird.resolve(predicate(req, data))
+
+    .then((branch) => run([ branch ? ifTrue : otherwise ], req))
+
+});
+
+
 module.exports = Middleware;
