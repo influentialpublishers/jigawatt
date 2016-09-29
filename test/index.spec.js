@@ -465,4 +465,91 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  describe('JW::promisify', function() {
+
+
+    it('should translate the list of middlewares into a promise', function() {
+
+      const mw1 = {
+        transform: (req, data) => _.merge(data, { foo: 'bar' })
+      };
+
+      const mw2 = {
+        transform: (req, data) => _.merge(data, { bar: 'baz' })
+      };
+
+      const test = JW.promisify(mw1, mw2)
+
+      const req  = { data: { boo: 'aahh' } };
+
+      return test(req).then((data) => expect(data).to.deep.eql({
+        foo: 'bar'
+      , bar: 'baz'
+      , boo: 'aahh'
+      }))
+
+    })
+
+
+  });
+
+
+  describe('JW::pipe', function() {
+
+    it('should compose a set of JW middleware into a single unit',
+    function(done) {
+
+      const mw1 = {
+        transform: (req, data) => _.merge(data, { foo: 'bar' })
+      };
+
+      const mw2 = {
+        transform: (req, data) => _.merge(data, { bar: 'baz' })
+      };
+
+
+      const mw3 = {
+        transform: (req, data) => _.merge(data, { fizz: 'buzz' })
+      };
+
+      const mw4 = {
+        transform: (req, data) => _.merge(data, { fuzz: 'buzz' })
+      };
+
+      const mw5 = {
+        transform: (req, data) => _.merge(data, { fozzy: 'foo', boo: 'bah' })
+      };
+
+      const mw6 = {
+        transform: (req, data) => _.merge(data, { fozzy: 'bear' })
+      };
+
+      const composed = JW.pipe(mw1, [mw2, mw3], mw4)
+
+      const test = JW(mw5, composed, mw6)
+
+      const req = { data: { moo: 'cow', boo: 'poo' } };
+
+      const res = {
+        json: (data) => {
+          expect(data).to.deep.eql({
+            foo: 'bar'
+          , bar: 'baz'
+          , fizz: 'buzz'
+          , fuzz: 'buzz'
+          , boo: 'bah'
+          , fozzy: 'bear'
+          , moo: 'cow'
+          });
+          done();
+        }
+      };
+
+      test(req, res, done);
+
+    })
+
+  })
+
+
 });
