@@ -104,4 +104,12 @@ Middleware.branch = (predicate, ifTrue, otherwise) => ({
 });
 
 
+Middleware.promisify = (...middleware) => (req) => run(middleware, req)
+
+
+Middleware.pipe = (...middleware) => ({
+  transform: (req) => run(middleware, req)
+})
+
+
 module.exports = Middleware;
