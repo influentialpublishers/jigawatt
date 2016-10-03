@@ -71,9 +71,9 @@ const JW         = require('jigawatt')
 
 // MIDDLEWARE
 const Order      = require('../middleware/order.js')
-const Customer   = require('../middleare/customer.js')
+const Customer   = require('../middleware/customer.js')
 const Product    = require('../middleware/product.js')
-const Shipping   = require('../middleare/shipping.js')
+const Shipping   = require('../middleware/shipping.js')
 
 
 // ROUTES
