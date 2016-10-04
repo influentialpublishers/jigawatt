@@ -1,95 +1,53 @@
+# jigawatt
+
 [![Build Status](https://travis-ci.org/influentialpublishers/jigawatt.svg?branch=master)](https://travis-ci.org/influentialpublishers/jigawatt)
 [![Coverage Status](https://coveralls.io/repos/github/influentialpublishers/jigawatt/badge.svg?branch=master)](https://coveralls.io/github/influentialpublishers/jigawatt?branch=master)
 [![codecov](https://codecov.io/gh/influentialpublishers/jigawatt/branch/master/graph/badge.svg)](https://codecov.io/gh/influentialpublishers/jigawatt)
 [![Code Climate](https://codeclimate.com/github/influentialpublishers/jigawatt/badges/gpa.svg)](https://codeclimate.com/github/influentialpublishers/jigawatt)
 
-# jigawatt
 Influential's Functional, Promise-based Express Middleware
+
+### Table of Contents
+**Status:** Required by default, optional for READMEs less than 100 lines.
+
+**Requirements:**
+- Must link to all Markdown sections in the file.
+- Must start with the next section; do not include the title or Table of Contents headings.
+- Must be at least one-depth: must capture all `##` headings.
 
 ## Installation
 `npm install jigawatt`
 
-## Middleware Structure
+Then, require the module.
 
-### Properties
-Jigawatt Middleware must consist of at least one of three properties:
-- `awesomize`: `(Validator -> AwesomizeSpec) -> Request -> Object a`
-  - validates/sanitizes the request to initialize the `data` object
-  - _for more info on `awesomize`, see https://www.npmjs.com/package/awesomize_
+`const JW = require('jigawatt')`
 
-- `io`: `Request, Data -> Object a`
-  - returns an object that is merged into `req.data`
+## Usage
+**Middleware Structure**
 
-- `transform`: `Request, Data -> Object a`
-  - returns an object to become the new `req.data` value
+Jigawatt Middleware should contain at least one of the following three properties:
 
-### Example Middleware
-```
-const _         = require('ramda')
-const Bluebird  = require('bluebird')
+### awesomize
+**`awesomize :: (Validator -> AwesomizeSpec) -> Request -> Object a`**
 
-const Order = require('../domain/order.js')
-
-const getById = {
-  awesomize: (v) => ({
-    order_id: {
-      read: _.path(['params', 'orderId'])
-    , validation: [ v.required ]
-    }
-  })
-
-  io: (req, data) => {
-    return Bluebird.props({
-      order : Order.getById(data.order_id)
-    })
-  }
-};
-
-const uniteDetails = {
-  transform: (req, data) => {
-    return {
-      order     : data.order
-    , customer  : data.customer
-    , product   : data.product
-    , shipping  : data.shipping  
-    }
-  }
-}
-
-module.exports = {
-  getById
-, uniteDetails
-}
-```
+- Normalize/Sanitize/Validate an object
+- Returns a promise
+-
 
 
-## Example Usage
+## Contribute
+**Status**: Required.
 
-```
-const router     = require('express').Router()
-const JW         = require('jigawatt')
+**Requirements:**
+- State where users can ask questions.
+- State whether PRs are accepted.
+- List any requirements for contributing; for instance, having a sign-off on commits.
 
-// MIDDLEWARE
-const Order      = require('../middleware/order.js')
-const Customer   = require('../middleare/customer.js')
-const Product    = require('../middleware/product.js')
-const Shipping   = require('../middleare/shipping.js')
+**Suggestions:**
+- Link to a contributing or contribute file -- if there is one.
+- Be as friendly as possible.
+- Link to the GitHub issues.
+- Link to Code of Conduct. This is often in Contribute, or organization wide, so may not be necessary for each module.
 
-
-// ROUTES
-router.get('order/:orderId', JW(Order.getById));
-
-router.get('order/:orderId/detail', JW(
-
-  [ Order.getById             // call all of these promise
-  , Customer.getByOrderId     // functions at the same time
-  , Product.getByOrderId      // and merge request.data when
-  , Shipping.getByOrderId     // all are complete
-  ]
-
-, Order.uniteDetails          // transform-only middleware
-                              // to aggregate details and
-                              // present to user
-))
-```
-
+## License
+**MIT** &copy; Nathan Sculli
