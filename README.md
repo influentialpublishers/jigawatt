@@ -22,12 +22,76 @@ Then, require the module.
 
 `const JW = require('jigawatt')`
 
-## Usage
-**Middleware Structure**
+## Using Jigawatt
 
-Jigawatt Middleware should contain at least one of the following three properties:
+### Basic Usage Example
 
-### awesomize
+Consider the following endpoint:
+
+```
+app.get('/order/:id', (req, res)=> {
+
+  const data = {
+    order    : db.getById(req.params.id)
+  , product  : db.getProductByOrderId(req.params.id)
+  , customer : db.getCustomerByOrderId(req.params.id)
+  }
+
+  const getOrder = JW(formatOrder, data)
+      , result   = { json : (data) => data }
+
+...
+```
+
+Jigawatt middleware functions, such as `formatOrder` in this case, are created to handle the incoming data:
+
+```
+const formatOrder = {
+  awesomize: (v) => ({
+    id : {
+      read : R.path([ 'order', 'id' ])
+    , validate : [ v.required, v.isInt ]
+    }
+  , product  : { sanitize : [ R.trim ] }
+  , customer : { validate : [ v.required ] }
+  })
+
+, io: (req, data) => ({
+    orderId  : data.id
+  , product  : data.product
+  , customer : data.customer
+  })
+}
+```
+
+This will return a promise which, when resolved, will be a new beautified object.
+
+```
+...
+
+Promise
+  .resolve(
+    getOrder(data, result)
+  )
+  .then((orderDetails) => {
+    // do what you will with the data
+  })
+```
+**Example output:**
+```
+{ "orderId"  : "1234"
+, "product"  : "Mechanical pencil"
+, "customer" : "Jabroni Seagull"
+}
+```
+
+This might be a bit overwhelming at first sight, so let's break it down in a bit more detail...
+
+### Middleware Structure
+
+Jigawatt Middleware expects at least one of the following three properties:
+
+#### awesomize
 **`awesomize :: (Validator -> AwesomizeSpec) -> Request -> Object a`**
 
 - Normalize/Sanitize/Validate an object
