@@ -367,6 +367,31 @@ describe('jigawatt/index.js', () => {
 
   });
 
+  describe('JW::pick', function() {
+
+    it('should pick selected keys from the data object if they exist', function(done) {
+
+      const req = {
+        data: { foo: {a: 'bar', b: 'baz'}, bar: 'fiz' }
+      }
+
+      const expected = { foo: {a: 'bar', b: 'baz'} }
+
+      const res = {
+        json: (x) => {
+          expect(x).to.eql(expected)
+          done();
+        }
+      }
+
+      const test = JW(JW.pick(['foo', 'boo']))
+
+      test(req, res, done)
+
+    });
+
+  });
+
 
   describe('JW::branch', function() {
 
