@@ -20,7 +20,7 @@ Influential's Functional, Promise-based Express Middleware
 - [License](#license)
 
 ## Installation
-`npm install jigawatt`
+`npm install jigawatt --save`
 
 ## Using Jigawatt
 
@@ -28,9 +28,13 @@ First, require the module.
 
 `const JW = require('jigawatt')`
 
+For this walkthrough, we'll also be using Ramda.
+
+`const R = require('ramda')`
+
 ### Basic Usage Example
 
-Consider the following endpoint:
+Consider the following Express endpoint:
 
 ```
 app.get('/order/:id', (req, res)=> {
@@ -73,12 +77,12 @@ This will return a promise which, when resolved, will be a new beautified object
 ```
 ...
 
-Promise
-  .resolve(
-    getOrder(data, result)
-  )
-  .then((orderDetails) => {
-    // do what you will with the data
+getOrder(data, result)
+  .then ((orderDetails) => {
+    // Do what you will with the data
+  })
+  .catch ((err) => {
+    // Handle the error
   })
 ```
 **Example output:**
@@ -124,7 +128,7 @@ awesomize: (v) => ({
 ...
 ```
 
-**`validate`** is a validator that is passed to our function as `v`.  Awesomize's `validate` component has a few built-in validator methods such as `required`, `isInt`, `isFunction`, etc...
+**`validate`** is awesomize's built-in validator. Awesomize's `validate` component has a few built-in validator methods such as `required`, `isInt`, `isFunction`, etc... that are passed to our function as `v`.
 
 ```
 awesomize: (v) => ({
@@ -149,7 +153,7 @@ awesomize: (v) => ({
 })
 ```
 
-A complete awesomize function can be used to awesomize more than one value:
+A complete awesomize function can awesomize more than one value:
 
 ```
 awesomize: (v) => ({
@@ -174,7 +178,7 @@ io: (req, data) => ({
     orderId  : data.id
   , product  : data.product
   , customer : data.customer
-  , quantity : db.getQuantityByOrderId(data.id) // Grab value from database
+  , quantity : dao.getQuantityByOrderId(data.id) // Grab value from database
   })
 ```
 
@@ -186,12 +190,45 @@ Where `data.__` represents data that has been passed from our awesomize function
 
 - Can piece together data into a new object
 
+Given an input object such as (the input will have already passed through awesomize):
+
+```
+data = {
+  id : 1234
+, product : {
+    productId : 1234
+  , productName : "Mechanical Pencil"
+
+    ...
+  }
+, customer : {
+    customerId : 1234
+  , customerName : "Jabroni Seagull"
+
+    ...
+  }
+
+  ...
+}
+```
+
+We can orchestrate how we want to structure the data
+
 ```
 transform: (req, data) => ({
     orderId  : data.id
   , product  : data.product
   , customer : data.customer
   })
+```
+
+And we can expect an output of
+
+```
+{ "orderId"  : "1234"
+, "product"  : "Mechanical pencil"
+, "customer" : "Jabroni Seagull"
+}
 ```
 
 ## Contribute
