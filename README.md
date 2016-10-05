@@ -149,7 +149,7 @@ awesomize: (v) => ({
 })
 ```
 
-A complete awesomize function can awesomize more than one value:
+A complete awesomize function can be used to awesomize more than one value:
 
 ```
 awesomize: (v) => ({
@@ -195,7 +195,7 @@ transform: (req, data) => ({
 ```
 
 ## Contribute
-If you find issues with Jigawatt, please open an issue ticket on the [issues page](https://github.com/influentialpublishers/jigawatt/issues). Please open a ticket on the issues page before submitting any pull requests!
+If you find issues with Jigawatt, we encourage you to open an issue ticket on the [issues page](https://github.com/influentialpublishers/jigawatt/issues). Please open a ticket on the issues page before submitting any pull requests!
 
 ## License
 **MIT** &copy; Influential
