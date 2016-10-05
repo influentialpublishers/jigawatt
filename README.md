@@ -217,8 +217,8 @@ We can orchestrate how we want to structure the data
 ```
 transform: (req, data) => ({
     orderId  : data.id
-  , product  : data.product
-  , customer : data.customer
+  , product  : R.path([ 'product', 'productName' ], data)
+  , customer : R.path([ 'customer', 'customerName' ], data)
   })
 ```
 
