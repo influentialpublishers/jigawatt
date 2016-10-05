@@ -4,25 +4,29 @@
 [![Coverage Status](https://coveralls.io/repos/github/influentialpublishers/jigawatt/badge.svg?branch=master)](https://coveralls.io/github/influentialpublishers/jigawatt?branch=master)
 [![codecov](https://codecov.io/gh/influentialpublishers/jigawatt/branch/master/graph/badge.svg)](https://codecov.io/gh/influentialpublishers/jigawatt)
 [![Code Climate](https://codeclimate.com/github/influentialpublishers/jigawatt/badges/gpa.svg)](https://codeclimate.com/github/influentialpublishers/jigawatt)
+[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 Influential's Functional, Promise-based Express Middleware
 
 ### Table of Contents
-**Status:** Required by default, optional for READMEs less than 100 lines.
-
-**Requirements:**
-- Must link to all Markdown sections in the file.
-- Must start with the next section; do not include the title or Table of Contents headings.
-- Must be at least one-depth: must capture all `##` headings.
+- [Installation](#installation)
+- [Using Jigawatt](#using-jigawatt)
+  - [Basic Usage](#basic-usage-example)
+  - [Middleware Structure](#middleware-structure)
+    - [awesomize](#awesomize)
+    - [io](#io)
+    - [transform](#transform)
+- [Contribute](#contribute)
+- [License](#license)
 
 ## Installation
 `npm install jigawatt`
 
-Then, require the module.
+## Using Jigawatt
+
+First, require the module.
 
 `const JW = require('jigawatt')`
-
-## Using Jigawatt
 
 ### Basic Usage Example
 
@@ -32,9 +36,9 @@ Consider the following endpoint:
 app.get('/order/:id', (req, res)=> {
 
   const data = {
-    order    : db.getById(req.params.id)
-  , product  : db.getProductByOrderId(req.params.id)
-  , customer : db.getCustomerByOrderId(req.params.id)
+    order    : db.getById(req.params.id)              // Assuming that
+  , product  : db.getProductByOrderId(req.params.id)  // this is data
+  , customer : db.getCustomerByOrderId(req.params.id) // from database
   }
 
   const getOrder = JW(formatOrder, data)
@@ -95,23 +99,103 @@ Jigawatt Middleware expects at least one of the following three properties:
 **`awesomize :: (Validator -> AwesomizeSpec) -> Request -> Object a`**
 
 - Normalize/Sanitize/Validate an object
-- Returns a promise
--
+- For more detailed documentation about awesomize, visit the [awesomize documentation](https://github.com/influentialpublishers/awesomize)
 
+Awesomize has four components, all of which are optional: **read -> sanitize -> validate -> normalize**
+
+The **`read`** component has access to the entire object passed to the awesomize function. Here, we'll use Ramda to target a specific value of the object passed:
+
+```
+awesomize: (v) => ({
+  id : {
+    read : R.path([ 'order', 'id' ])
+
+...
+```
+
+**`sanitize`** is an awesomize component that can manipulate the data before it is validated.
+
+```
+awesomize: (v) => ({
+  id : {
+    read : R.path([ 'order', 'id' ])
+  , sanitize : [ R.drop(2) ]
+
+...
+```
+
+**`validate`** is a validator that is passed to our function as `v`.  Awesomize's `validate` component has a few built-in validator methods such as `required`, `isInt`, `isFunction`, etc...
+
+```
+awesomize: (v) => ({
+  id : {
+    read : R.path([ 'order', 'id' ])
+  , validate : [ v.required, v.isInt ]
+
+...
+```
+
+We can also chain validation methods, as seen above. For more info on awesomize validators, visit the [documentation](https://github.com/influentialpublishers/awesomize#built-in-validators)
+
+**`normalize`** is the last awesomize component, called after the data has been validated.
+
+```
+awesomize: (v) => ({
+  id : {
+    read      : R.path([ 'order', 'id' ])
+  , validate  : [ v.required, v.isInt ]
+  , normalize : [ R.inc ]
+  }
+})
+```
+
+A complete awesomize function can awesomize more than one value:
+
+```
+awesomize: (v) => ({
+  id : {
+    read      : R.path([ 'order', 'id' ])
+  , validate  : [ v.required, v.isInt ]
+  }
+, product  : { sanitize : [ R.trim ] }
+, customer : { validate : [ v.required ] }
+})
+```
+
+
+#### io
+**`io :: Request -> Data -> Object a`**
+
+- Can merge new data into object
+- Returns a promise
+
+```
+io: (req, data) => ({
+    orderId  : data.id
+  , product  : data.product
+  , customer : data.customer
+  , quantity : db.getQuantityByOrderId(data.id) // Grab value from database
+  })
+```
+
+Where `data.__` represents data that has been passed from our awesomize function.
+
+
+#### transform
+**`transform :: Request -> Data -> Object a`**
+
+- Can piece together data into a new object
+
+```
+transform: (req, data) => ({
+    orderId  : data.id
+  , product  : data.product
+  , customer : data.customer
+  })
+```
 
 ## Contribute
-**Status**: Required.
-
-**Requirements:**
-- State where users can ask questions.
-- State whether PRs are accepted.
-- List any requirements for contributing; for instance, having a sign-off on commits.
-
-**Suggestions:**
-- Link to a contributing or contribute file -- if there is one.
-- Be as friendly as possible.
-- Link to the GitHub issues.
-- Link to Code of Conduct. This is often in Contribute, or organization wide, so may not be necessary for each module.
+If you find issues with Jigawatt, please open an issue ticket on the [issues page](https://github.com/influentialpublishers/jigawatt/issues). Please open a ticket on the issues page before submitting any pull requests!
 
 ## License
-**MIT** &copy; Nathan Sculli
+**MIT** &copy; Influential
