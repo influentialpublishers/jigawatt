@@ -16,6 +16,7 @@ Influential's Functional, Promise-based Express Middleware
     - [awesomize](#awesomize)
     - [io](#io)
     - [transform](#transform)
+    - [Summary](#summary)
 - [Contribute](#contribute)
 - [License](#license)
 
@@ -34,62 +35,66 @@ For this walkthrough, we'll also be using Ramda.
 
 ### Basic Usage Example
 
-Consider the following Express endpoint:
+For this example, we have a poll and poll responses stored in a database. Consider the following endpoint:
 
 ```
-app.get('/order/:id', (req, res)=> {
+app.get('/best-city-results/:id', (req, res) => {
+  const data       = { pollId : req.params.id }
+      , formatPoll = JW(pollDetails, data)
 
-  const data = {
-    order    : db.getById(req.params.id)              // Assuming that
-  , product  : db.getProductByOrderId(req.params.id)  // this is data
-  , customer : db.getCustomerByOrderId(req.params.id) // from database
-  }
-
-  const getOrder = JW(formatOrder, data)
-      , result   = { json : (data) => data }
+  formatPoll(data, { json : (data) => data })
+    .then((details) => // Do something with result
+    .catch((err)    => // Handle the error
+})
 
 ...
 ```
 
-Jigawatt middleware functions, such as `formatOrder` in this case, are created to handle the incoming data:
+Jigawatt middleware functions, such as `pollDetails` in this case, are created to sanitize, validate, and/or normalize the incoming data (`awesomize`), then use that awesomized data to query the database (`io`), and lastly, format the results to our liking and return the output (`transform`).
 
 ```
-const formatOrder = {
+const pollDetails = {
   awesomize: (v) => ({
-    id : {
-      read : R.path([ 'order', 'id' ])
-    , validate : [ v.required, v.isInt ]
+    pollId : {
+      sanitize : R.toLower
+    , validate : isCorrectLength
     }
-  , product  : { sanitize : [ R.trim ] }
-  , customer : { validate : [ v.required ] }
   })
 
 , io: (req, data) => ({
-    orderId  : data.id
-  , product  : data.product
-  , customer : data.customer
+    poll      : db.Poll.findOne({ _id: data.pollId })
+  , responses : db.Vote.find({ poll_id: data.pollId })
+  })
+
+, transform: (req, data) => ({
+    poll    : data.poll.title
+  , results : tallyVotes(
+                getCity(data.poll)
+              , getAnswer(data.responses)
+              )
   })
 }
 ```
 
-This will return a promise which, when resolved, will be a new beautified object.
+Our Jigawatt middleware returns a thenable, which can be used to handle the resulting data as desired:
 
 ```
 ...
 
-getOrder(data, result)
-  .then ((orderDetails) => {
-    // Do what you will with the data
-  })
-  .catch ((err) => {
-    // Handle the error
-  })
+formatPoll(data, { json : (data) => data })
+  .then((details) => // Do something with result
+  .catch((err)    => // Handle the error
 ```
 **Example output:**
 ```
-{ "orderId"  : "1234"
-, "product"  : "Mechanical pencil"
-, "customer" : "Jabroni Seagull"
+{
+	"poll": "What is your favorite city?",
+	"results": [ { "Juneau": 2 }
+             , { "Vladivostok": 3 }
+             , { "Redding": 1	}
+             , { "Wilmington": 0 }
+             , { "Galveston": 2	}
+             ]
 }
 ```
 
@@ -100,7 +105,7 @@ This might be a bit overwhelming at first sight, so let's break it down in a bit
 Jigawatt Middleware expects at least one of the following three properties:
 
 #### awesomize
-**`awesomize :: (Validator -> AwesomizeSpec) -> Request -> Object a`**
+**`awesomize :: Validator -> -> Request -> Object`**
 
 - Normalize/Sanitize/Validate an object
 - For more detailed documentation about awesomize, visit the [awesomize documentation](https://github.com/influentialpublishers/awesomize)
@@ -128,7 +133,7 @@ awesomize: (v) => ({
 ...
 ```
 
-**`validate`** is awesomize's built-in validator. Awesomize's `validate` component has a few built-in validator methods such as `required`, `isInt`, `isFunction`, etc... that are passed to our function as `v`.
+**`validate`** is a validator that is passed to our function as `v`.  Awesomize's `validate` component has a few built-in validator methods such as `required`, `isInt`, `isFunction`, etc...
 
 ```
 awesomize: (v) => ({
@@ -139,7 +144,23 @@ awesomize: (v) => ({
 ...
 ```
 
-We can also chain validation methods, as seen above. For more info on awesomize validators, visit the [documentation](https://github.com/influentialpublishers/awesomize#built-in-validators)
+We can also chain validation methods, as seen above. For more info on awesomize validators, visit the [documentation](https://github.com/influentialpublishers/awesomize#built-in-validators).
+
+As a last note about `validate`, we can create our own custom validator functions as well:
+
+```
+const isCorrectLength = (str) => R.equals(24, str.length)
+
+...
+
+awesomize: (v) => ({
+  pollId : {
+    sanitize : R.toLower
+  , validate : isCorrectLength
+  }
+
+...
+```
 
 **`normalize`** is the last awesomize component, called after the data has been validated.
 
@@ -168,66 +189,76 @@ awesomize: (v) => ({
 
 
 #### io
-**`io :: Request -> Data -> Object a`**
+**`io :: Request -> Data -> Object`**
 
 - Can merge new data into object
 - Returns a promise
 
+`io`'s primary use is to fetch data using the information passed to it from the awesomize function.  In the example below, we have `io` making two calls to two separate database tables.  Once resolved, `io` will pass the data fetched from the database along to the `transform` method.
+
 ```
 io: (req, data) => ({
-    orderId  : data.id
-  , product  : data.product
-  , customer : data.customer
-  , quantity : dao.getQuantityByOrderId(data.id) // Grab value from database
+    poll      : db.Poll.findOne({ _id: data.pollId })
+  , responses : db.Vote.find({ poll_id: data.pollId })
   })
 ```
-
-Where `data.__` represents data that has been passed from our awesomize function.
 
 
 #### transform
-**`transform :: Request -> Data -> Object a`**
+**`transform :: Request -> Data -> Object`**
 
 - Can piece together data into a new object
 
-Given an input object such as (the input will have already passed through awesomize):
+`transform` is used to structure the incoming data in a unique way.  Remember that `transform` is optional, and if omitted, the Jigawatt middleware simply returns the raw results.
 
 ```
-data = {
-  id : 1234
-, product : {
-    productId : 1234
-  , productName : "Mechanical Pencil"
+const getAnswer = (arr) => R.compose(
+  R.map(R.dec)
+, R.pluck('answer')
+)(arr)
 
-    ...
-  }
-, customer : {
-    customerId : 1234
-  , customerName : "Jabroni Seagull"
+const getCity = (obj) => R.map(
+  R.replace(/\,.*$/, '')
+, obj.questions
+)
 
-    ...
-  }
+const tallyVotes = (options, responses) => {
+  // Tally total vote for a specific city
+  return R.map((str) => {
+    let ind = R.indexOf(str, options)
 
-  ...
+    let votes = R.compose(
+      R.length
+    , R.filter(R.equals(ind))
+    )(responses)
+
+    return R.assoc(str, votes, {})
+  }, options)
 }
-```
 
-We can orchestrate how we want to structure the data
+...
 
-```
 transform: (req, data) => ({
-    orderId  : data.id
-  , product  : R.path([ 'product', 'productName' ], data)
-  , customer : R.path([ 'customer', 'customerName' ], data)
+    poll    : data.poll.title
+  , results : tallyVotes(
+                getCity(data.poll)
+              , getAnswer(data.responses)
+              )
   })
 ```
 
-And we can expect an output of
+#### Summary
+Our Jigawatt middleware was used to take an incoming ID, query two separate database tables for that ID, and format the results to our liking. The final output of our Jigawatt middleware looks like this:
 
 ```
-{ "orderId"  : "1234"
-, "product"  : "Mechanical pencil"
-, "customer" : "Jabroni Seagull"
+{
+	"poll": "What is your favorite city?",
+	"results": [ { "Juneau": 2 }
+             , { "Vladivostok": 3 }
+             , { "Redding": 1	}
+             , { "Wilmington": 0 }
+             , { "Galveston": 2	}
+             ]
 }
 ```
 
@@ -235,4 +266,4 @@ And we can expect an output of
 If you find issues with Jigawatt, we encourage you to open an issue ticket on the [issues page](https://github.com/influentialpublishers/jigawatt/issues). Please open a ticket on the issues page before submitting any pull requests!
 
 ## License
-**MIT** &copy; Influential
+**MIT** &copy; Influential, Nathan Sculli
