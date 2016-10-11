@@ -105,7 +105,7 @@ This might be a bit overwhelming at first sight, so let's break it down in a bit
 Jigawatt Middleware expects at least one of the following three properties:
 
 #### awesomize
-**`awesomize :: Validator -> -> Request -> Object`**
+**`awesomize :: Validator -> Request -> Object`**
 
 - Normalize/Sanitize/Validate an object
 - For more detailed documentation about awesomize, visit the [awesomize documentation](https://github.com/influentialpublishers/awesomize)
