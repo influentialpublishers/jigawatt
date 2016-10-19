@@ -182,9 +182,6 @@ awesomize: (v) => ({
 #### io
 **`io :: Request -> Data -> Object`**
 
-- Can merge new data into object
-- Returns a promise
-
 `io`'s primary use is to fetch data using the information passed to it from the awesomize function.  In the example below, we have `io` making two calls to two separate database tables.  Once resolved, `io` will pass the data fetched from the database along to the `transform` method.
 
 ```javascript
@@ -197,8 +194,6 @@ io: (req, data) => ({
 
 #### transform
 **`transform :: Request -> Data -> Object`**
-
-- Can piece together data into a new object
 
 `transform` is used to structure the incoming data in a unique way.  Remember that `transform` is optional, and if omitted, the Jigawatt middleware simply returns the raw results.
 
