@@ -112,9 +112,4 @@ Middleware.pipe = (...middleware) => ({
 })
 
 
-Middleware.pick = (keys) => ({
-  transform: (req, data) => Bluebird.resolve( _.pick(keys, data))
-});
-
-
 module.exports = Middleware;
