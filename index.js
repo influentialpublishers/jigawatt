@@ -80,6 +80,29 @@ const Middleware = (...middleware) => {
 };
 
 
+Middleware.csv = (...middleware) => {
+  Validate.testMiddleware(middleware)
+
+  return (req, res, next) =>
+    run(middleware, req)
+
+    .then((csv) => {
+
+      res.set({
+        'Content-Type'        : 'application/csv'
+      , 'Content-Disposition' : 'attachment; filename=vetting.csv'
+      , 'Pragma'              : 'no-cache'
+      })
+
+      res.send(csv)
+
+    })
+
+    .catch(next)
+
+};
+
+
 Middleware.debug = (label) => ({
   transform: (req, data) => {
     const data_as_string = inspect(data);
