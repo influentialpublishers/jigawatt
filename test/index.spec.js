@@ -314,6 +314,35 @@ describe('jigawatt/index.js', () => {
   });
 
 
+  describe('JW::csv', function() {
+
+    it('should send set the CSV headers and data.', function(done) {
+
+      const mw    = { transform: () => "foo, bar, baz" }
+      const test  = JW.csv(mw)
+      let headers = {}
+
+      const res = {
+        set: (info) => { headers = info }
+
+      , send: (data) => {
+          expect(data).to.eql('foo, bar, baz')
+          expect(headers['Content-Type']).to.eql('application/csv')
+          expect(headers['Content-Disposition'])
+            .to.eql('attachment; filename=vetting.csv')
+          expect(headers['Pragma']).to.eql('no-cache')
+
+          done()
+        }
+      }
+
+      test({}, res, done)
+
+    });
+
+  });
+
+
   describe('JW::debug', function() {
 
     it('should not affect the data object', function(done) {
